@@ -1,0 +1,1360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GoMeal - Point of Sale Design</title>
+  
+  <style>
+    :root {
+      --y: #F8B602;
+      --bg: #F4F4F4;
+      --ink: #2B2B2B;
+      --mute: #9A94A6;
+      --red: #E8545A;
+      --card: #ffffff;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      color: var(--ink);
+      background-color: #ffffff;
+    }
+    button {
+      font: inherit;
+      cursor: pointer;
+      border: 0;
+      background: none;
+    }
+    button:focus-visible, 
+    a:focus-visible, 
+    input:focus-visible {
+      outline: 2px solid var(--y);
+      outline-offset: 2px;
+    }
+    .app {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 350px;
+      min-height: 100vh;
+    }
+    .main {
+      background: var(--bg);
+      padding: 40px;
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+    }
+    .top {
+      display: flex;
+      align-items: center;
+    }
+    h1 {
+      font-size: 32px;
+      font-weight: 700;
+    }
+    .banner {
+      background: var(--ink);
+      color: #ffffff;
+      border-radius: 24px;
+      padding: 40px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+      margin-bottom: 32px;
+    }
+    .banner::before {
+      content: "";
+      position: absolute;
+      top: -50%;
+      right: -10%;
+      width: 300px;
+      height: 300px;
+      background: var(--y);
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.25;
+      z-index: 0;
+    }
+    .banner::after {
+      content: "🍔";
+      position: absolute;
+      right: 20px;
+      bottom: -30px;
+      font-size: 160px;
+      opacity: 0.15;
+      transform: rotate(-15deg);
+      z-index: 0;
+      pointer-events: none;
+    }
+    .banner-badge {
+      display: inline-block;
+      background: var(--y);
+      color: var(--ink);
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      margin-bottom: 16px;
+      position: relative;
+      z-index: 1;
+    }
+    .banner h2 {
+      font-size: 34px;
+      line-height: 1.3;
+      font-weight: 800;
+      max-width: 500px;
+      position: relative;
+      z-index: 1;
+    }
+    .banner p {
+      font-size: 14px;
+      color: #B4B4B4;
+      max-width: 460px;
+      margin-top: 12px;
+      line-height: 1.6;
+      position: relative;
+      z-index: 1;
+    }
+    .sec-h {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    h3 {
+      font-size: 22px;
+      font-weight: 600;
+    }
+    .grid {
+      display: grid;
+      gap: 16px;
+    }
+    .cats {
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      margin-bottom: 32px;
+    }
+    .cat {
+      background: var(--card);
+      border: 1px solid #EAEAEA;
+      border-radius: 16px;
+      padding: 16px;
+      height: auto;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      text-align: left;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      color: var(--mute);
+      cursor: pointer;
+    }
+    .cat.active {
+      background: var(--ink);
+      color: #ffffff;
+      border-color: var(--ink);
+    }
+    .cat-icon {
+      font-size: 28px;
+      background: var(--bg);
+      padding: 10px;
+      border-radius: 12px;
+    }
+    .cat.active .cat-icon {
+      background: rgba(255, 255, 255, 0.1);
+    }
+    .cat:hover {
+      transform: translateY(-5px);
+    }
+    .cat b {
+      font-size: 16px;
+      font-weight: 600;
+    }
+    .dishes {
+      grid-template-columns: repeat(3, 1fr);
+      margin-bottom: 32px;
+    }
+    .dish {
+      background: var(--card);
+      border: 1px solid #EEEEEE;
+      border-radius: 20px;
+      padding: 20px;
+      position: relative;
+      transition: all 0.25s ease;
+    }
+    .dish:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+      border-color: var(--y);
+    }
+    .dish-img-wrap {
+      background: radial-gradient(circle, rgba(248,182,2,0.12) 0%, rgba(255,255,255,0) 70%);
+      border-radius: 14px;
+      padding: 10px;
+      display: flex;
+      justify-content: center;
+      margin-bottom: 16px;
+    }
+    .dish-img {
+      width: 100%;
+      height: 160px;
+      object-fit: contain;
+      display: block;
+      filter: drop-shadow(0px 10px 15px rgba(0,0,0,0.1));
+    }
+    .dish-badge {
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      background: #FFF3D6;
+      color: #D98200;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 8px;
+      z-index: 2;
+    }
+    .stars {
+      color: var(--y);
+      font-size: 22px;
+      letter-spacing: 2px;
+      margin-bottom: 8px;
+    }
+    .dish-f {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+    .name {
+      font-size: 17px;
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+    .price {
+      font-size: 26px;
+      font-weight: 600;
+    }
+    .price::first-letter {
+      color: var(--y);
+    }
+    .dish-qty {
+      background: var(--bg);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 6px;
+      border-radius: 10px;
+    }
+    .dish-qty .c-btn {
+      width: 32px;
+      height: 32px;
+      background: #ffffff;
+      border-radius: 8px;
+      font-size: 20px;
+      font-weight: 500;
+      display: grid;
+      place-items: center;
+      transition: background 0.2s;
+    }
+    .dish-qty .c-btn:hover {
+      background: var(--y);
+      color: #fff;
+    }
+    .c-qty-val {
+      font-weight: 600;
+      font-size: 16px;
+      min-width: 20px;
+      text-align: center;
+    }
+    .panel {
+      padding: 40px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      background: #ffffff;
+      border-left: 1px solid #eaeaea;
+    }
+    .icons {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin-bottom: 10px;
+    }
+    .icons i {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      background: var(--ink);
+      opacity: 0.1;
+    }
+    .avatar {
+      margin-left: auto;
+      width: 60px;
+      height: 60px;
+      border-radius: 14px;
+      background: #d9c7b8;
+      display: grid;
+      place-items: center;
+      font-size: 30px;
+    }
+    .bal {
+      position: relative;
+      overflow: hidden;
+      background: var(--y);
+      border-radius: 16px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .bal::before {
+      content: "";
+      position: absolute;
+      left: -60px;
+      top: -40px;
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      background: #F58A2E;
+      opacity: 0.8;
+      z-index: 1;
+    }
+    .bal > * {
+      position: relative;
+      z-index: 2;
+    }
+    .bal-box {
+      background: #ffffff;
+      color: var(--ink);
+      border-radius: 14px;
+      padding: 16px;
+      width: 100%;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+    .bal-box small {
+      font-size: 13px;
+      color: var(--mute);
+    }
+    .bal-box strong {
+      display: block;
+      font-size: 26px;
+      margin-top: 4px;
+    }
+    .bal-actions {
+      display: flex;
+      gap: 12px;
+      width: 100%;
+    }
+    .act-btn {
+      flex: 1;
+      background: rgba(255, 255, 255, 0.25);
+      color: #ffffff;
+      border-radius: 10px;
+      padding: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: background 0.2s ease;
+    }
+    .act-btn:hover {
+      background: rgba(255, 255, 255, 0.4);
+    }
+    .addr {
+      margin-top: 10px;
+    }
+    .addr small {
+      color: var(--mute);
+      font-size: 16px;
+      font-weight: 600;
+    }
+    .addr-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin: 12px 0 16px 0;
+      background: var(--bg);
+      padding: 16px;
+      border-radius: 12px;
+    }
+    .addr-details {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .change {
+      border: 1px solid var(--y);
+      color: var(--y);
+      border-radius: 6px;
+      padding: 6px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      margin-top: -2px;
+      flex-shrink: 0;
+    }
+    .chip {
+      border: 1px solid var(--ink);
+      border-radius: 6px;
+      padding: 6px 18px;
+      font-size: 13px;
+      margin-right: 8px;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+    .chip:hover {
+      background: var(--ink);
+      color: #fff;
+    }
+    .order {
+      flex: 1;
+      min-height: 180px;
+      border-bottom: 1px solid #dddddd;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      overflow-y: auto;
+      padding-bottom: 10px;
+    }
+    .empty-cart-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      min-height: 160px;
+      border: 2px dashed #E0E0E0;
+      border-radius: 12px;
+      margin: 10px 0;
+    }
+    .c-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--bg);
+      padding: 10px;
+      border-radius: 10px;
+    }
+    .c-icon {
+      font-size: 24px;
+      width: 40px;
+      height: 40px;
+      background: #fff;
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+    }
+    .c-info {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    .c-name {
+      font-size: 14px;
+      font-weight: 600;
+    }
+    .c-price {
+      font-size: 14px;
+      color: var(--y);
+      font-weight: 600;
+    }
+    .c-qty-box {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #fff;
+      padding: 4px;
+      border-radius: 8px;
+    }
+    .c-btn {
+      width: 24px;
+      height: 24px;
+      background: var(--bg);
+      border-radius: 6px;
+      font-weight: bold;
+      display: grid;
+      place-items: center;
+    }
+    .sum {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .sum-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 600;
+      font-size: 18px;
+    }
+    .sum-row small {
+      color: var(--mute);
+      font-weight: 400;
+    }
+    .pay-methods {
+      display: flex;
+      gap: 16px;
+      margin-top: 4px;
+    }
+    .pay-methods label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+    .pay-methods input[type="radio"] {
+      accent-color: var(--y);
+      width: 18px;
+      height: 18px;
+    }
+    .cash-in {
+      width: 100%;
+      height: 50px;
+      border: 2px solid #eaeaea;
+      border-radius: 12px;
+      padding: 0 16px;
+      font-size: 16px;
+      font-family: inherit;
+      outline: none;
+    }
+    .cash-in:focus {
+      border-color: var(--y);
+    }
+    .checkout {
+      background: var(--y);
+      color: #ffffff;
+      font-size: 18px;
+      font-weight: 600;
+      height: 64px;
+      border-radius: 12px;
+      width: 100%;
+      transition: background 0.2s ease;
+    }
+    .checkout:hover {
+      background: #e5a802;
+    }
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.6);
+      z-index: 999;
+      display: none;
+      place-items: center;
+    }
+    .modal-content {
+      background: #ffffff;
+      padding: 28px;
+      border-radius: 16px;
+      width: 90%;
+      max-width: 460px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+    .modal-content h3 {
+      font-size: 20px;
+      margin-bottom: 4px;
+    }
+    .m-input {
+      width: 100%;
+      padding: 14px 16px;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      font-size: 14px;
+      font-family: inherit;
+      outline: none;
+    }
+    .m-input:focus {
+      border-color: var(--y);
+    }
+    .m-row {
+      display: flex;
+      gap: 12px;
+    }
+    .m-btn-save {
+      background: var(--y);
+      color: #ffffff;
+      padding: 16px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 15px;
+      margin-top: 8px;
+    }
+    .m-btn-cancel {
+      background: var(--bg);
+      color: var(--ink);
+      padding: 16px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 15px;
+    }
+    .popup-icon {
+      font-size: 48px;
+      text-align: center;
+      margin-bottom: 8px;
+    }
+    .popup-msg {
+      font-size: 16px;
+      text-align: center;
+      color: var(--mute);
+    }
+    @media(max-width: 1100px) {
+      .app {
+        grid-template-columns: 1fr;
+      }
+      .cats, .dishes {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .panel {
+        border-left: none;
+        border-top: 1px solid #eaeaea;
+      }
+    }
+  </style>
+</head>
+<body>
+<div id="checkout-modal" class="modal">
+  <div class="modal-content">
+    <div id="c-popup-icon" class="popup-icon">✅</div>
+    <h3 id="c-popup-title" style="text-align: center;">Success</h3>
+    <div id="c-popup-msg" class="popup-msg"></div>
+    <button id="c-popup-close" class="m-btn-cancel" style="margin-top: 12px;">Close</button>
+  </div>
+</div>
+<div id="addr-modal" class="modal">
+  <div class="modal-content">
+    <h3>Edit Delivery Address</h3>
+    <input type="text" id="m-name" class="m-input" placeholder="Full Name">
+    <input type="text" id="m-phone" class="m-input" placeholder="Phone Number">
+    <div class="m-row">
+      <input type="text" id="m-region" class="m-input" placeholder="Region">
+      <input type="text" id="m-city" class="m-input" placeholder="City">
+    </div>
+    <div class="m-row">
+      <input type="text" id="m-brgy" class="m-input" placeholder="Barangay">
+      <input type="text" id="m-street" class="m-input" placeholder="Street, Building, House No.">
+    </div>
+    <input type="text" id="m-note" class="m-input" placeholder="Landmark / Notes (Optional)">
+    <button id="m-save" class="m-btn-save">Save Address</button>
+    <button id="m-cancel" class="m-btn-cancel">Cancel</button>
+  </div>
+</div>
+<div id="wallet-modal" class="modal">
+  <div class="modal-content">
+    <h3 id="w-title">Transfer</h3>
+    <input type="number" id="w-amount" class="m-input" placeholder="Enter amount" min="1">
+    <div id="w-msg" style="color: var(--red); font-size: 13px; font-weight: 500;"></div>
+    <button id="w-confirm" class="m-btn-save">Confirm</button>
+    <button id="w-cancel-wallet" class="m-btn-cancel">Cancel</button>
+  </div>
+</div>
+<div class="app">
+  <main class="main">
+    <header class="top">
+      <h1>GO, MEAL.</h1>
+    </header>
+    <div id="dashboard">
+      <section class="banner">
+        <div class="banner-badge">🔥 SPECIAL PROMO</div>
+        <h2>Order Your Favorite Food<br>in Just a Few Clicks!</h2>
+        <p>From local favorites to your comfort cravings,<br>we bring great meals right to your doorstep.</p>
+      </section>
+      
+      <section>
+        <div class="sec-h">
+          <h3>Category</h3>
+        </div>
+        <div class="grid cats">
+          <div class="cat active" id="cat-burger">
+            <div class="cat-icon">🍔</div>
+            <b>Burger</b>
+          </div>
+          <div class="cat" id="cat-bev">
+            <div class="cat-icon">🥤</div>
+            <b>Beverage</b>
+          </div>
+        </div>
+      </section>
+      
+      <section id="sec-burger">
+        <div class="sec-h">
+          <h3>Burgers</h3>
+        </div>
+        <div class="grid dishes">
+          <article class="dish">
+            <div class="dish-badge">New</div>
+            <div class="dish-img-wrap">
+              <img src="Images/Fish_Buger.png" class="dish-img" alt="Fish Burger">
+            </div>
+            <div class="stars">★★★★★</div>
+            <div class="dish-f">
+              <div>
+                <div class="name">Fish Burger</div>
+                <div class="price">₱129.00</div>
+              </div>
+              <div class="dish-qty">
+                <button class="c-btn grid-action" data-name="Fish Burger" data-price="129" data-icon="🍔" data-delta="-1">-</button>
+                <span id="grid-qty-FishBurger" class="c-qty-val">0</span>
+                <button class="c-btn grid-action" data-name="Fish Burger" data-price="129" data-icon="🍔" data-delta="1">+</button>
+              </div>
+            </div>
+          </article>
+          
+          <article class="dish">
+            <div class="dish-badge">Best Seller</div>
+            <div class="dish-img-wrap">
+              <img src="Images/Beef_Burger.png" class="dish-img" alt="Beef Burger">
+            </div>
+            <div class="stars">★★★★★</div>
+            <div class="dish-f">
+              <div>
+                <div class="name">Beef Burger</div>
+                <div class="price">₱149.00</div>
+              </div>
+              <div class="dish-qty">
+                <button class="c-btn grid-action" data-name="Beef Burger" data-price="149" data-icon="🍔" data-delta="-1">-</button>
+                <span id="grid-qty-BeefBurger" class="c-qty-val">0</span>
+                <button class="c-btn grid-action" data-name="Beef Burger" data-price="149" data-icon="🍔" data-delta="1">+</button>
+              </div>
+            </div>
+          </article>
+          
+          <article class="dish">
+            <div class="dish-img-wrap">
+              <img src="Images/Cheese_Burger.png" class="dish-img" alt="Cheese Burger">
+            </div>
+            <div class="stars">★★★★☆</div>
+            <div class="dish-f">
+              <div>
+                <div class="name">Cheese Burger</div>
+                <div class="price">₱139.00</div>
+              </div>
+              <div class="dish-qty">
+                <button class="c-btn grid-action" data-name="Cheese Burger" data-price="139" data-icon="🍔" data-delta="-1">-</button>
+                <span id="grid-qty-CheeseBurger" class="c-qty-val">0</span>
+                <button class="c-btn grid-action" data-name="Cheese Burger" data-price="139" data-icon="🍔" data-delta="1">+</button>
+              </div>
+            </div>
+          </article>
+          
+          <article class="dish">
+            <div class="dish-img-wrap">
+              <img src="Images/Chicken_burger.png" class="dish-img" alt="Chicken Burger">
+            </div>
+            <div class="stars">★★★★★</div>
+            <div class="dish-f">
+              <div>
+                <div class="name">Chicken Burger</div>
+                <div class="price">₱117.00</div>
+              </div>
+              <div class="dish-qty">
+                <button class="c-btn grid-action" data-name="Chicken Burger" data-price="117" data-icon="🍔" data-delta="-1">-</button>
+                <span id="grid-qty-ChickenBurger" class="c-qty-val">0</span>
+                <button class="c-btn grid-action" data-name="Chicken Burger" data-price="117" data-icon="🍔" data-delta="1">+</button>
+              </div>
+            </div>
+          </article>
+          
+          <article class="dish">
+            <div class="dish-img-wrap">
+              <img src="Images/Bacon_Burger.png" class="dish-img" alt="Bacon Burger">
+            </div>
+            <div class="stars">★★★★☆</div>
+            <div class="dish-f">
+              <div>
+                <div class="name">Bacon Burger</div>
+                <div class="price">₱175.00</div>
+              </div>
+              <div class="dish-qty">
+                <button class="c-btn grid-action" data-name="Bacon Burger" data-price="175" data-icon="🍔" data-delta="-1">-</button>
+                <span id="grid-qty-BaconBurger" class="c-qty-val">0</span>
+                <button class="c-btn grid-action" data-name="Bacon Burger" data-price="175" data-icon="🍔" data-delta="1">+</button>
+              </div>
+            </div>
+          </article>
+          
+          <article class="dish">
+            <div class="dish-img-wrap">
+              <img src="Images/DoublePatty_Burger.png" class="dish-img" alt="Double Patty">
+            </div>
+            <div class="stars">★★★★★</div>
+            <div class="dish-f">
+              <div>
+                <div class="name">Double Patty</div>
+                <div class="price">₱209.00</div>
+              </div>
+              <div class="dish-qty">
+                <button class="c-btn grid-action" data-name="Double Patty" data-price="209" data-icon="🍔" data-delta="-1">-</button>
+                <span id="grid-qty-DoublePatty" class="c-qty-val">0</span>
+                <button class="c-btn grid-action" data-name="Double Patty" data-price="209" data-icon="🍔" data-delta="1">+</button>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+      
+      <section id="sec-bev" style="display: none;">
+        <div class="sec-h">
+          <h3>Beverages</h3>
+        </div>
+        <div class="grid dishes">
+          <article class="dish">
+            <div class="dish-img-wrap">
+              <img src="Images/cola.png" class="dish-img" alt="Cola">
+            </div>
+            <div class="stars">★★★★★</div>
+            <div class="dish-f">
+              <div>
+                <div class="name">Cola</div>
+                <div class="price">₱40.00</div>
+              </div>
+              <div class="dish-qty">
+                <button class="c-btn grid-action" data-name="Cola" data-price="40" data-icon="🥤" data-delta="-1">-</button>
+                <span id="grid-qty-Cola" class="c-qty-val">0</span>
+                <button class="c-btn grid-action" data-name="Cola" data-price="40" data-icon="🥤" data-delta="1">+</button>
+              </div>
+            </div>
+          </article>
+          <article class="dish">
+            <div class="dish-img-wrap">
+              <img src="Images/Iced_Tea.png" class="dish-img" alt="Iced Tea">
+            </div>
+            <div class="stars">★★★★☆</div>
+            <div class="dish-f">
+              <div>
+                <div class="name">Iced Tea</div>
+                <div class="price">₱43.00</div>
+              </div>
+              <div class="dish-qty">
+                <button class="c-btn grid-action" data-name="Iced Tea" data-price="43" data-icon="🥤" data-delta="-1">-</button>
+                <span id="grid-qty-IcedTea" class="c-qty-val">0</span>
+                <button class="c-btn grid-action" data-name="Iced Tea" data-price="43" data-icon="🥤" data-delta="1">+</button>
+              </div>
+            </div>
+          </article>
+          <article class="dish">
+            <div class="dish-img-wrap">
+              <img src="Images/Lemonade.png" class="dish-img" alt="Lemonade">
+            </div>
+            <div class="stars">★★★★★</div>
+            <div class="dish-f">
+              <div>
+                <div class="name">Lemonade</div>
+                <div class="price">₱47.00</div>
+              </div>
+              <div class="dish-qty">
+                <button class="c-btn grid-action" data-name="Lemonade" data-price="47" data-icon="🥤" data-delta="-1">-</button>
+                <span id="grid-qty-Lemonade" class="c-qty-val">0</span>
+                <button class="c-btn grid-action" data-name="Lemonade" data-price="47" data-icon="🥤" data-delta="1">+</button>
+              </div>
+            </div>
+          </article>
+          <article class="dish">
+            <div class="dish-img-wrap">
+              <img src="Images/Water.png" class="dish-img" alt="Water">
+            </div>
+            <div class="stars">★★★★☆</div>
+            <div class="dish-f">
+              <div>
+                <div class="name">Water</div>
+                <div class="price">₱20.00</div>
+              </div>
+              <div class="dish-qty">
+                <button class="c-btn grid-action" data-name="Water" data-price="20" data-icon="🥤" data-delta="-1">-</button>
+                <span id="grid-qty-Water" class="c-qty-val">0</span>
+                <button class="c-btn grid-action" data-name="Water" data-price="20" data-icon="🥤" data-delta="1">+</button>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+      
+      <section id="sec-pop">
+        <div class="sec-h">
+          <h3>Popular Dishes</h3>
+        </div>
+        <div class="grid dishes">
+          <article class="dish">
+            <div class="dish-badge" style="color: var(--red); background: #FDE8E9;">Spicy</div>
+            <div class="dish-img-wrap">
+              <img src="Images/Pepperoni_Pizza.png" class="dish-img" alt="Pepperoni Pizza">
+            </div>
+            <div class="stars">★★★★★</div>
+            <div class="dish-f">
+              <div>
+                <div class="name">Spicy Pizza</div>
+                <div class="price">₱500.00</div>
+              </div>
+              <div class="dish-qty">
+                <button class="c-btn grid-action" data-name="Spicy Pizza" data-price="500" data-icon="🍕" data-delta="-1">-</button>
+                <span id="grid-qty-SpicyPizza" class="c-qty-val">0</span>
+                <button class="c-btn grid-action" data-name="Spicy Pizza" data-price="500" data-icon="🍕" data-delta="1">+</button>
+              </div>
+            </div>
+          </article>
+          
+          <article class="dish">
+            <div class="dish-img-wrap">
+              <img src="Images/Fresh_Sushi.png" class="dish-img" alt="Fresh Sushi">
+            </div>
+            <div class="stars">★★★★★</div>
+            <div class="dish-f">
+              <div>
+                <div class="name">Fresh Sushi</div>
+                <div class="price">₱751.00</div>
+              </div>
+              <div class="dish-qty">
+                <button class="c-btn grid-action" data-name="Fresh Sushi" data-price="751" data-icon="🍣" data-delta="-1">-</button>
+                <span id="grid-qty-FreshSushi" class="c-qty-val">0</span>
+                <button class="c-btn grid-action" data-name="Fresh Sushi" data-price="751" data-icon="🍣" data-delta="1">+</button>
+              </div>
+            </div>
+          </article>
+          
+          <article class="dish">
+            <div class="dish-img-wrap">
+              <img src="Images/Fried_Chicken.png" class="dish-img" alt="Fried Chicken">
+            </div>
+            <div class="stars">★★★★☆</div>
+            <div class="dish-f">
+              <div>
+                <div class="name">Fried Chicken</div>
+                <div class="price">₱563.00</div>
+              </div>
+              <div class="dish-qty">
+                <button class="c-btn grid-action" data-name="Fried Chicken" data-price="563" data-icon="🍗" data-delta="-1">-</button>
+                <span id="grid-qty-FriedChicken" class="c-qty-val">0</span>
+                <button class="c-btn grid-action" data-name="Fried Chicken" data-price="563" data-icon="🍗" data-delta="1">+</button>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+    </div>
+  </main>
+  
+  <aside class="panel">
+    <div class="icons">
+      <i></i><i></i><i></i>
+      <div class="avatar">🙂</div>
+    </div>
+    
+    <h3>Your Balance</h3>
+    <div class="bal">
+      <div class="bal-box">
+        <small>GoWallet Balance</small>
+        <strong id="bal-amount">₱12,000.00</strong>
+      </div>
+      <div class="bal-actions">
+        <button class="act-btn" id="btn-topup"><span>⬇</span> Top Up</button>
+        <button class="act-btn" id="btn-transfer"><span>⬆</span> Transfer</button>
+      </div>
+    </div>
+    
+    <div class="addr">
+      <small>Delivery Address</small>
+      <div class="addr-row">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2B2B2B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0; margin-top: 2px;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+        <div class="addr-details">
+          <b id="user-name" style="font-size: 15px;"></b>
+          <span id="user-loc" style="font-size: 13px; color: var(--mute);"></span>
+          <span id="user-note" style="font-size: 13px; color: var(--y); font-weight: 500;"></span>
+        </div>
+        <button class="change" id="btn-change-addr">Change</button>
+      </div>
+      <button class="chip" id="btn-add-details">Add Details</button>
+      <button class="chip" id="btn-add-note">Add Note</button>
+    </div>
+    
+    <h3>Order Menu</h3>
+    <div class="order" id="order-list">
+      <div class="empty-cart-state" id="empty-cart-msg">
+        <span style="font-size: 40px; opacity: 0.5;">🛒</span>
+        <p style="color: var(--mute); font-size: 14px; margin-top: 8px;">Your cart is empty</p>
+      </div>
+    </div>
+    
+    <div class="sum">
+      <div class="sum-row">
+        <small>Service Total</small>
+        <span id="tot">₱0.00</span>
+      </div>
+      <div class="pay-methods">
+        <label><input type="radio" name="pay" id="pay-cash" checked> Cash</label>
+        <label><input type="radio" name="pay" id="pay-gowallet"> GoWallet</label>
+      </div>
+      
+      <input type="number" id="cash" class="cash-in" placeholder="Enter Cash Amount" min="0" step="0.50">
+      
+      <button class="checkout" id="chk">Checkout</button>
+    </div>
+  </aside>
+</div>
+<script>
+  var totalAmount = 0;
+  var currentBalance = 12000;
+  var walletMode = ''; 
+  
+  var addrName = ""; var addrPhone = ""; var addrRegion = "";
+  var addrCity = ""; var addrBrgy = ""; var addrStreet = ""; var addrNote = "";
+
+  function checkEmptyCart() {
+    var list = document.getElementById('order-list');
+    var emptyMsg = document.getElementById('empty-cart-msg');
+    var cartItems = list.getElementsByClassName('c-item');
+    if (cartItems.length === 0) {
+      if (emptyMsg) emptyMsg.style.display = 'flex';
+    } else {
+      if (emptyMsg) emptyMsg.style.display = 'none';
+    }
+  }
+
+  function modifyCart(name, price, icon, delta) {
+    var idName = name.replace(/\s+/g, '');
+    var cartItemId = 'cart-item-' + idName;
+    var existingItem = document.getElementById(cartItemId);
+    if (existingItem) {
+      var qtyEl = document.getElementById('qty-' + idName);
+      var currentQty = parseInt(qtyEl.textContent);
+      var newQty = currentQty + delta;
+      if (newQty <= 0) {
+        existingItem.parentNode.removeChild(existingItem);
+      } else {
+        qtyEl.textContent = newQty;
+      }
+    } else if (delta > 0) {
+      var list = document.getElementById('order-list');
+      
+      var box = document.createElement('div');
+      box.className = 'c-item';
+      box.id = cartItemId;
+      box.dataset.price = price; 
+      var iconDiv = document.createElement('div');
+      iconDiv.className = 'c-icon';
+      iconDiv.textContent = icon;
+      box.appendChild(iconDiv);
+      var infoDiv = document.createElement('div');
+      infoDiv.className = 'c-info';
+      
+      var nameDiv = document.createElement('div');
+      nameDiv.className = 'c-name';
+      nameDiv.textContent = name;
+      
+      var priceDiv = document.createElement('div');
+      priceDiv.className = 'c-price';
+      priceDiv.textContent = '₱' + price.toFixed(2);
+      
+      infoDiv.appendChild(nameDiv);
+      infoDiv.appendChild(priceDiv);
+      box.appendChild(infoDiv);
+      var qtyBox = document.createElement('div');
+      qtyBox.className = 'c-qty-box';
+      
+      var btnMinus = document.createElement('button');
+      btnMinus.className = 'c-btn';
+      btnMinus.textContent = '-';
+      btnMinus.addEventListener('click', function() { modifyCart(name, price, icon, -1); });
+      
+      var qtySpan = document.createElement('span');
+      qtySpan.id = 'qty-' + idName;
+      qtySpan.style.fontWeight = '600';
+      qtySpan.style.width = '16px';
+      qtySpan.style.textAlign = 'center';
+      qtySpan.textContent = '1';
+      var btnPlus = document.createElement('button');
+      btnPlus.className = 'c-btn';
+      btnPlus.textContent = '+';
+      btnPlus.addEventListener('click', function() { modifyCart(name, price, icon, 1); });
+      qtyBox.appendChild(btnMinus);
+      qtyBox.appendChild(qtySpan);
+      qtyBox.appendChild(btnPlus);
+      box.appendChild(qtyBox);
+      list.appendChild(box);
+    }
+    
+    updateGridQty(idName);
+    calculateTotal();
+    checkEmptyCart();
+  }
+  function calculateTotal() {
+    totalAmount = 0;
+    var list = document.getElementById('order-list');
+    var items = list.getElementsByClassName('c-item');
+    
+    for (var i = 0; i < items.length; i++) {
+      var item = items[i];
+      var price = parseFloat(item.dataset.price);
+      var idName = item.id.replace('cart-item-', '');
+      var qty = parseInt(document.getElementById('qty-' + idName).textContent);
+      totalAmount += (price * qty);
+    }
+    
+    document.getElementById('tot').textContent = '₱' + totalAmount.toFixed(2);
+  }
+  function updateGridQty(idName) {
+    var gridQtyEl = document.getElementById('grid-qty-' + idName);
+    if (gridQtyEl) {
+      var cartQtyEl = document.getElementById('qty-' + idName);
+      if (cartQtyEl) {
+        gridQtyEl.textContent = cartQtyEl.textContent;
+      } else {
+        gridQtyEl.textContent = '0';
+      }
+    }
+  }
+  function clearCartData() {
+    var list = document.getElementById('order-list');
+    var items = list.getElementsByClassName('c-item');
+    while(items.length > 0){
+      items[0].parentNode.removeChild(items[0]);
+    }
+    
+    var gridValues = document.querySelectorAll('.c-qty-val');
+    for (var i = 0; i < gridValues.length; i++) {
+      gridValues[i].textContent = '0';
+    }
+    
+    document.getElementById('cash').value = '';
+    calculateTotal();
+    checkEmptyCart();
+  }
+  function updateBalanceDisplay() {
+    document.getElementById('bal-amount').textContent = '₱' + currentBalance.toFixed(2);
+  }
+  
+  var gridActionBtns = document.querySelectorAll('.grid-action');
+  for (var i = 0; i < gridActionBtns.length; i++) {
+    gridActionBtns[i].addEventListener('click', function(event) {
+      var btn = event.currentTarget;
+      var name = btn.getAttribute('data-name');
+      var price = parseFloat(btn.getAttribute('data-price'));
+      var icon = btn.getAttribute('data-icon');
+      var delta = parseInt(btn.getAttribute('data-delta'));
+      modifyCart(name, price, icon, delta);
+    });
+  }
+  document.getElementById('btn-topup').addEventListener('click', function() {
+    walletMode = 'topup';
+    document.getElementById('w-title').textContent = 'Top Up GoWallet';
+    document.getElementById('w-amount').value = '';
+    document.getElementById('w-msg').textContent = '';
+    document.getElementById('wallet-modal').style.display = 'grid';
+  });
+  
+  document.getElementById('btn-transfer').addEventListener('click', function() {
+    walletMode = 'transfer';
+    document.getElementById('w-title').textContent = 'Transfer to Bank/E-Wallet';
+    document.getElementById('w-amount').value = '';
+    document.getElementById('w-msg').textContent = '';
+    document.getElementById('wallet-modal').style.display = 'grid';
+  });
+  
+  document.getElementById('w-cancel-wallet').addEventListener('click', function() {
+    document.getElementById('wallet-modal').style.display = 'none';
+  });
+  
+  document.getElementById('w-confirm').addEventListener('click', function() {
+    var amt = parseFloat(document.getElementById('w-amount').value);
+    var msgEl = document.getElementById('w-msg');
+    
+    if (isNaN(amt) || amt <= 0) {
+      msgEl.textContent = 'Please enter a valid positive amount.';
+      msgEl.style.color = 'var(--red)';
+      return;
+    }
+    if (walletMode === 'topup') {
+      currentBalance += amt;
+      updateBalanceDisplay();
+      document.getElementById('wallet-modal').style.display = 'none';
+      showPopup('✅', 'Success', 'Successfully added ₱' + amt.toFixed(2) + ' to GoWallet!');
+    } else if (walletMode === 'transfer') {
+      if (amt > currentBalance) {
+        msgEl.textContent = 'Insufficient balance! You only have ₱' + currentBalance.toFixed(2);
+        msgEl.style.color = 'var(--red)';
+      } else {
+        currentBalance -= amt;
+        updateBalanceDisplay();
+        document.getElementById('wallet-modal').style.display = 'none';
+        showPopup('✅', 'Success', 'Successfully transferred ₱' + amt.toFixed(2) + ' out of GoWallet!');
+      }
+    }
+  });
+  function updateAddressDisplay() {
+    var userNameEl = document.getElementById('user-name');
+    var userLocEl = document.getElementById('user-loc');
+    var userNoteEl = document.getElementById('user-note');
+    
+    if (addrName === "" && addrStreet === "") {
+      userNameEl.textContent = "No address added yet";
+      userNameEl.style.color = "var(--mute)";
+      userLocEl.textContent = "Click 'Change' to set your delivery location.";
+      userNoteEl.style.display = "none";
+    } else {
+      var nameDisplay = addrName;
+      if (addrPhone !== "") {
+         nameDisplay += " | " + addrPhone;
+      }
+      userNameEl.textContent = nameDisplay;
+      userNameEl.style.color = "var(--ink)";
+      
+      var locString = "";
+      if (addrStreet) locString += addrStreet + ", ";
+      if (addrBrgy) locString += addrBrgy + ", ";
+      if (addrCity) locString += addrCity + ", ";
+      if (addrRegion) locString += addrRegion;
+      
+      if (locString.endsWith(", ")) {
+        locString = locString.substring(0, locString.length - 2);
+      }
+      userLocEl.textContent = locString;
+      
+      if (addrNote.trim() !== "") {
+        userNoteEl.textContent = "Note: " + addrNote;
+        userNoteEl.style.display = "block";
+      } else {
+        userNoteEl.style.display = "none";
+      }
+    }
+  }
+  function openAddressModal() {
+    document.getElementById('m-name').value = addrName;
+    document.getElementById('m-phone').value = addrPhone;
+    document.getElementById('m-region').value = addrRegion;
+    document.getElementById('m-city').value = addrCity;
+    document.getElementById('m-brgy').value = addrBrgy;
+    document.getElementById('m-street').value = addrStreet;
+    document.getElementById('m-note').value = addrNote;
+    document.getElementById('addr-modal').style.display = 'grid';
+  }
+  
+  document.getElementById('btn-change-addr').addEventListener('click', openAddressModal);
+  document.getElementById('btn-add-details').addEventListener('click', openAddressModal);
+  
+  document.getElementById('btn-add-note').addEventListener('click', function() {
+    openAddressModal();
+    setTimeout(function() { document.getElementById('m-note').focus(); }, 100);
+  });
+  
+  document.getElementById('m-cancel').addEventListener('click', function() {
+    document.getElementById('addr-modal').style.display = 'none';
+  });
+  
+  document.getElementById('m-save').addEventListener('click', function() {
+    addrName = document.getElementById('m-name').value;
+    addrPhone = document.getElementById('m-phone').value;
+    addrRegion = document.getElementById('m-region').value;
+    addrCity = document.getElementById('m-city').value;
+    addrBrgy = document.getElementById('m-brgy').value;
+    addrStreet = document.getElementById('m-street').value;
+    addrNote = document.getElementById('m-note').value;
+    
+    updateAddressDisplay();
+    document.getElementById('addr-modal').style.display = 'none';
+  });
+  document.getElementById('cat-burger').addEventListener('click', function() {
+    document.getElementById('sec-burger').style.display = 'block';
+    document.getElementById('sec-pop').style.display = 'block';
+    document.getElementById('sec-bev').style.display = 'none';
+    document.getElementById('cat-burger').classList.add('active');
+    document.getElementById('cat-bev').classList.remove('active');
+  });
+  
+  document.getElementById('cat-bev').addEventListener('click', function() {
+    document.getElementById('sec-burger').style.display = 'none';
+    document.getElementById('sec-pop').style.display = 'none';
+    document.getElementById('sec-bev').style.display = 'block';
+    document.getElementById('cat-bev').classList.add('active');
+    document.getElementById('cat-burger').classList.remove('active');
+  });
+  
+  document.getElementById('pay-cash').addEventListener('change', function() {
+    document.getElementById('cash').style.display = 'block';
+  });
+  
+  document.getElementById('pay-gowallet').addEventListener('change', function() {
+    document.getElementById('cash').style.display = 'none';
+  });
+  function showPopup(icon, title, message) {
+    document.getElementById('c-popup-icon').textContent = icon;
+    document.getElementById('c-popup-title').textContent = title;
+    document.getElementById('c-popup-msg').textContent = message;
+    
+    if (title === 'Error') {
+       document.getElementById('c-popup-title').style.color = 'var(--red)';
+    } else {
+       document.getElementById('c-popup-title').style.color = '#27ae60';
+    }
+    document.getElementById('checkout-modal').style.display = 'grid';
+  }
+  document.getElementById('c-popup-close').addEventListener('click', function() {
+    document.getElementById('checkout-modal').style.display = 'none';
+  });
+  document.getElementById('chk').addEventListener('click', function() {
+    if (totalAmount === 0) {
+      showPopup('🛒', 'Error', 'Your cart is empty. Please add items first.');
+      return;
+    }
+    
+    if (addrName.trim() === "" || addrStreet.trim() === "") {
+      showPopup('📍', 'Error', 'Please add a delivery address (Name and Street) before checking out.');
+      return;
+    }
+    
+    var isCashMethod = document.getElementById('pay-cash').checked;
+    
+    if (isCashMethod) {
+      var cashValue = document.getElementById('cash').value;
+      var cashAmount = parseFloat(cashValue);
+      
+      if (cashValue === '' || isNaN(cashAmount)) {
+        showPopup('💰', 'Error', 'Please enter a valid cash amount.');
+        return;
+      }
+      
+      if (cashAmount < totalAmount) {
+        var missingAmount = totalAmount - cashAmount;
+        showPopup('⚠️', 'Error', 'Insufficient cash. You need ₱' + missingAmount.toFixed(2) + ' more.');
+      } else {
+        var changeAmount = cashAmount - totalAmount;
+        showPopup('🎉', 'Success', 'Order successfully placed! Your change is ₱' + changeAmount.toFixed(2));
+        clearCartData();
+      }
+    } else {
+      if (currentBalance >= totalAmount) {
+        currentBalance -= totalAmount;
+        updateBalanceDisplay();
+        showPopup('🎉', 'Success', 'Order successfully placed via GoWallet! Balance left: ₱' + currentBalance.toFixed(2));
+        clearCartData();
+      } else {
+        showPopup('⚠️', 'Error', 'Insufficient GoWallet balance.');
+      }
+    }
+  });
+  
+  updateAddressDisplay();
+</script>
+<!--
+Group 2
+Members:
+Bagasan, Retie Martin G.
+Bautista, Dhrizmiane
+Del Fierro, Jovan Miguel
+Gacoscos, Dennice Shane
+Linde, Sophia Nicole
+Payawal, James Iceah
+Rivera, Justine Ruel
+Sigua, John Edric
+-->
+</body>
+</html>
